@@ -1,1 +1,5 @@
 python-3.11.9
+Flask==2.3.3
+gunicorn==21.2.0
+flask-limiter==3.5.0
+typing-extensions==4.9.0
