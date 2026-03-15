@@ -212,6 +212,20 @@ if __name__ == "__main__":
 ║    • Academic Dashboards                                      ║
 ║                                                              ║
 ╚══════════════════════════════════════════════════════════════╝
+from flask import Flask
+
+app = Flask(__name__)
+
+# --- existing routes here ---
+@app.route("/")
+def index():
+    return "Hello, Parent Chatbot!"
+
+# --- add this health check route ---
+@app.route("/ping")
+def ping():
+    return "pong", 200
+
     """)
     
     app.run(debug=True, host='0.0.0.0', port=5000)
