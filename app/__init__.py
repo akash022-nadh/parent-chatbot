@@ -19,7 +19,7 @@ load_dotenv()
 # Initialize extensions
 jwt = JWTManager()
 bcrypt = Bcrypt()
-limiter = Limiter(key_func=get_remote_address)
+limiter = Limiter(key_func=get_remote_address, default_limits=["1000 per hour"])
 
 def create_app(config_name='development'):
     """Application factory pattern"""
