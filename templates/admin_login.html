@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin Portal — EduParent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1b35;
+    --navy-mid: #1a2d54;
+    --teal: #00c9a7;
+    --teal-dark: #00a889;
+    --gold: #f5c842;
+    --light: #e8f0fe;
+    --text: #e2e8f4;
+    --muted: #8a9bb8;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --error: #ff6b6b;
+    --success: #00c9a7;
+    --bg-color: var(--navy);
+    --input-bg: rgba(255,255,255,0.05);
+  }
+
+  [data-theme="light"] {
+    --navy: #ffffff;
+    --navy-mid: #f5f5f5;
+    --teal: #000000;
+    --teal-dark: #333333;
+    --gold: #000000;
+    --light: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --card-bg: rgba(0,0,0,0.03);
+    --card-border: rgba(0,0,0,0.15);
+    --error: #dc2626;
+    --success: #000000;
+    --bg-color: #ffffff;
+    --input-bg: rgba(0,0,0,0.03);
+  }
+
+  [data-theme="bw"] {
+    --navy: #000000;
+    --navy-mid: #111111;
+    --teal: #ffffff;
+    --teal-dark: #cccccc;
+    --gold: #ffffff;
+    --light: #ffffff;
+    --text: #ffffff;
+    --muted: #aaaaaa;
+    --card-bg: rgba(255,255,255,0.08);
+    --card-border: rgba(255,255,255,0.2);
+    --error: #ff4444;
+    --success: #ffffff;
+    --bg-color: #000000;
+    --input-bg: rgba(255,255,255,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    position: relative;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,200,66,0.15) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s;
+    z-index: 100;
+  }
+
+  .back-link:hover {
+    color: var(--teal);
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    z-index: 9999;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.3s;
+  }
+
+  .theme-toggle select {
+    background: var(--card-bg);
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 8px;
+    border-radius: 8px;
+    min-width: 120px;
+  }
+
+  .theme-toggle select option {
+    background: var(--navy-mid);
+    color: var(--text);
+    padding: 8px;
+  }
+
+  [data-theme="light"] .theme-toggle select {
+    background: #f0f0f0;
+    color: #000;
+  }
+
+  [data-theme="light"] .theme-toggle select option {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  [data-theme="bw"] .theme-toggle select {
+    background: #000;
+    color: #fff;
+  }
+
+  [data-theme="bw"] .theme-toggle select option {
+    background: #000000;
+    color: #ffffff;
+  }
+
+  /* Dark mode scrollbar */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--navy-mid);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--teal);
+  }
+
+  [data-theme="light"] ::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+
+  [data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #999;
+  }
+
+  [data-theme="bw"] ::-webkit-scrollbar-track {
+    background: #111;
+  }
+
+  [data-theme="bw"] ::-webkit-scrollbar-thumb {
+    background: #444;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 420px;
+    padding: 20px;
+    z-index: 1;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .brand-icon {
+    width: 70px; height: 70px;
+    background: linear-gradient(135deg, var(--gold), #e6b800);
+    border-radius: 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(245,200,66,0.3);
+  }
+
+  .brand h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .brand p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .admin-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(245,200,66,0.1);
+    border: 1px solid rgba(245,200,66,0.3);
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    color: var(--gold);
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    outline: none;
+  }
+
+  [data-theme="light"] input {
+    background: #f0f0f0;
+  }
+
+  input::placeholder { color: var(--muted); }
+  input:focus {
+    border-color: var(--gold);
+    background: rgba(245,200,66,0.05);
+    box-shadow: 0 0 0 3px rgba(245,200,66,0.1);
+  }
+
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--gold), #e6b800);
+    color: #0f1b35;
+    box-shadow: 0 4px 20px rgba(245,200,66,0.3);
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(245,200,66,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .alert.show { display: block; }
+  .alert-error { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: #ff9999; }
+  .alert-success { background: rgba(0,201,167,0.1); border: 1px solid rgba(0,201,167,0.3); color: var(--teal); }
+
+  .demo-hint {
+    background: rgba(245,200,66,0.08);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 0.82rem;
+    color: var(--gold);
+    margin-top: 20px;
+    line-height: 1.5;
+  }
+
+  .demo-hint strong { font-weight: 600; }
+
+  .loader {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<a href="/" class="back-link">← Back to Home</a>
+
+<div class="theme-toggle">
+  🎨 <select id="themeSelect" onchange="setTheme(this.value)">
+    <option value="dark">Dark (Navy)</option>
+    <option value="light">Light (White)</option>
+    <option value="bw">Black & White</option>
+  </select>
+</div>
+
+<div class="container">
+  <div class="brand">
+    <div class="brand-icon">🔐</div>
+    <h1>EduParent</h1>
+    <p>Secure Admin Portal</p>
+    <div class="admin-badge">🔒 Administrator Access</div>
+  </div>
+
+  <div class="card">
+    <h2>Admin Login</h2>
+    <p class="step-desc">Enter your credentials to access the administration dashboard.</p>
+
+    <div class="alert alert-error" id="errorAlert"></div>
+
+    <div class="input-group">
+      <label>Username</label>
+      <input type="text" id="username" placeholder="Enter admin username" autocomplete="username">
+    </div>
+
+    <div class="input-group">
+      <label>Password</label>
+      <input type="password" id="password" placeholder="Enter password" autocomplete="current-password">
+    </div>
+
+    <button class="btn btn-primary" id="loginBtn" onclick="adminLogin()">Login to Dashboard →</button>
+    <button class="btn btn-ghost" onclick="window.location.href='/'">← Back to Home</button>
+    <a href="/register" style="display:block;text-align:center;margin-top:15px;color:var(--teal);text-decoration:none;font-size:0.9rem;">Don't have an account? Register here</a>
+
+    <div class="demo-hint">
+      <strong>Demo Credentials:</strong><br>
+      Username: <code>admin</code><br>
+      Password: <code>admin123</code>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme management
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  function loadTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.getElementById('themeSelect').value = saved;
+    setTheme(saved);
+  }
+
+  loadTheme();
+
+  function showError(msg) {
+    const el = document.getElementById('errorAlert');
+    el.textContent = msg;
+    el.classList.add('show');
+  }
+
+  function clearError() {
+    document.getElementById('errorAlert').classList.remove('show');
+  }
+
+  function setLoading(loading) {
+    const btn = document.getElementById('loginBtn');
+    btn.disabled = loading;
+    btn.innerHTML = loading ? `<span class="loader"></span> Logging in...` : 'Login to Dashboard →';
+  }
+
+  async function adminLogin() {
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+
+    if (!username || !password) {
+      showError('Please enter both username and password.');
+      return;
+    }
+
+    clearError();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ username, password, role: 'admin' })
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        // Store token
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('user_role', data.user.role);
+        // Redirect to admin dashboard
+        window.location.href = '/admin/dashboard';
+      } else {
+        showError(data.message || 'Invalid credentials.');
+      }
+    } catch (err) {
+      showError('Connection error. Please try again.');
+    }
+
+    setLoading(false);
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') adminLogin();
+  });
+</script>
+</body>
+</html>

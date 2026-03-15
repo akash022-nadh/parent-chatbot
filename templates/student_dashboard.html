@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Dashboard — EduParent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1b35;
+    --navy-mid: #1a2d54;
+    --teal: #00c9a7;
+    --teal-dark: #00a889;
+    --gold: #f5c842;
+    --light: #e8f0fe;
+    --text: #e2e8f4;
+    --muted: #8a9bb8;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --error: #ff6b6b;
+    --success: #00c9a7;
+    --bg-color: var(--navy);
+  }
+
+  [data-theme="light"] {
+    --navy: #ffffff;
+    --navy-mid: #f5f5f5;
+    --teal: #000000;
+    --teal-dark: #333333;
+    --gold: #000000;
+    --light: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --card-bg: rgba(0,0,0,0.03);
+    --card-border: rgba(0,0,0,0.15);
+    --bg-color: #ffffff;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--card-border);
+    margin-bottom: 30px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+  }
+
+  .logo h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--text);
+  }
+
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+  }
+
+  .user-badge {
+    background: rgba(0,201,167,0.1);
+    border: 1px solid rgba(0,201,167,0.3);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--teal);
+  }
+
+  .btn {
+    padding: 10px 20px;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff;
+  }
+
+  .btn-primary:hover { transform: translateY(-1px); }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+  }
+
+  .btn-ghost:hover { border-color: var(--teal); color: var(--teal); }
+
+  .dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 16px;
+    padding: 24px;
+    backdrop-filter: blur(10px);
+  }
+
+  .card h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+
+  .stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .stat-row:last-child { border-bottom: none; }
+
+  .stat-label { color: var(--muted); font-size: 0.9rem; }
+
+  .stat-value {
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .stat-value.good { color: var(--success); }
+  .stat-value.warning { color: var(--gold); }
+  .stat-value.bad { color: var(--error); }
+
+  .progress-bar {
+    width: 100%;
+    height: 8px;
+    background: var(--navy-mid);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--teal), var(--teal-dark));
+    border-radius: 4px;
+    transition: width 0.3s;
+  }
+
+  .subject-list {
+    margin-top: 12px;
+  }
+
+  .subject-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  .subject-item:last-child { border-bottom: none; }
+
+  .subject-name { font-size: 0.9rem; }
+
+  .subject-marks {
+    font-weight: 600;
+    font-size: 0.9rem;
+  }
+
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    z-index: 100;
+    font-size: 0.85rem;
+    color: var(--text);
+  }
+
+  .theme-toggle select {
+    background: var(--card-bg);
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 8px;
+    border-radius: 8px;
+  }
+
+  .quick-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-top: 16px;
+  }
+
+  .action-btn {
+    padding: 10px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 10px;
+    color: var(--text);
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .action-btn:hover {
+    border-color: var(--teal);
+    background: rgba(0,201,167,0.1);
+  }
+
+  @media (max-width: 768px) {
+    .header { flex-direction: column; gap: 15px; }
+    .dashboard-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<div class="theme-toggle">
+  🎨 <select id="themeSelect" onchange="setTheme(this.value)">
+    <option value="dark">Dark Mode</option>
+    <option value="light">Light Mode</option>
+  </select>
+</div>
+
+<div class="container">
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <div>
+        <h1>EduParent</h1>
+        <p style="color: var(--muted); font-size: 0.85rem;">Student Portal</p>
+      </div>
+    </div>
+    <div class="user-info">
+      <span class="user-badge">👨‍🎓 Student</span>
+      <button class="btn btn-ghost" onclick="window.location.href='/'">Logout</button>
+    </div>
+  </div>
+
+  <div class="dashboard-grid">
+    <!-- Profile Card -->
+    <div class="card">
+      <h2>👤 Profile</h2>
+      <div class="stat-row">
+        <span class="stat-label">Name</span>
+        <span class="stat-value" id="studentName">Loading...</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Registration No</span>
+        <span class="stat-value" id="regNo">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Branch</span>
+        <span class="stat-value" id="branch">-</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Year</span>
+        <span class="stat-value" id="year">-</span>
+      </div>
+    </div>
+
+    <!-- Attendance Card -->
+    <div class="card">
+      <h2>📊 Attendance</h2>
+      <div class="stat-row">
+        <span class="stat-label">Overall Attendance</span>
+        <span class="stat-value good" id="attendance">85%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" style="width: 85%"></div>
+      </div>
+      <div class="quick-actions">
+        <button class="action-btn" onclick="showDetails('attendance')">View Details</button>
+      </div>
+    </div>
+
+    <!-- Marks Card -->
+    <div class="card">
+      <h2>📝 Marks</h2>
+      <div class="stat-row">
+        <span class="stat-label">Current CGPA</span>
+        <span class="stat-value good" id="cgpa">8.5</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Semester</span>
+        <span class="stat-value" id="semester">-</span>
+      </div>
+      <div class="quick-actions">
+        <button class="action-btn" onclick="showDetails('marks')">View All Marks</button>
+      </div>
+    </div>
+
+    <!-- Fee Status Card -->
+    <div class="card">
+      <h2>💰 Fee Status</h2>
+      <div class="stat-row">
+        <span class="stat-label">Status</span>
+        <span class="stat-value good">Paid</span>
+      </div>
+      <div class="stat-row">
+        <span class="stat-label">Due Amount</span>
+        <span class="stat-value">₹0</span>
+      </div>
+      <div class="quick-actions">
+        <button class="action-btn" onclick="showDetails('fees')">View History</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="card">
+    <h2>⚡ Quick Actions</h2>
+    <div class="quick-actions">
+      <button class="action-btn" onclick="window.location.href='/chat'">💬 Chat with Bot</button>
+      <button class="action-btn" onclick="showDetails('backlogs')">📚 View Backlogs</button>
+      <button class="action-btn" onclick="showDetails('calendar')">📅 Academic Calendar</button>
+      <button class="action-btn" onclick="showDetails('faculty')">👨‍🏫 Faculty Contacts</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  document.getElementById('themeSelect').value = savedTheme;
+  setTheme(savedTheme);
+
+  function showDetails(type) {
+    alert('Opening ' + type + ' details...\n\nThis feature will be available soon!');
+  }
+
+  // Load user data from token
+  async function loadProfile() {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      window.location.href = '/student/login';
+      return;
+    }
+
+    try {
+      const res = await fetch('/api/student/profile', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      
+      if (data.success && data.profile) {
+        const profile = data.profile;
+        const personal = profile.personal_info || {};
+        const academic = profile.academic || {};
+        
+        document.getElementById('studentName').textContent = 
+          (personal.first_name || '') + ' ' + (personal.last_name || '') || 'Student';
+        document.getElementById('regNo').textContent = profile.reg_no || '-';
+        document.getElementById('branch').textContent = academic.branch || '-';
+        document.getElementById('year').textContent = academic.year ? academic.year + ' Year' : '-';
+        document.getElementById('semester').textContent = academic.semester ? 'Sem ' + academic.semester : '-';
+        document.getElementById('cgpa').textContent = academic.cgpa || '-';
+        document.getElementById('attendance').textContent = '85%';
+      } else {
+        // Show demo data if API fails
+        document.getElementById('studentName').textContent = 'Demo Student';
+        document.getElementById('regNo').textContent = 'STU001';
+        document.getElementById('branch').textContent = 'CSE';
+        document.getElementById('year').textContent = '3rd Year';
+        document.getElementById('semester').textContent = 'Sem 6';
+        document.getElementById('cgpa').textContent = '8.5';
+      }
+    } catch (err) {
+      console.error('Error loading profile:', err);
+      // Show demo data on error
+      document.getElementById('studentName').textContent = 'Demo Student';
+      document.getElementById('regNo').textContent = 'STU001';
+      document.getElementById('branch').textContent = 'CSE';
+      document.getElementById('year').textContent = '3rd Year';
+      document.getElementById('semester').textContent = 'Sem 6';
+      document.getElementById('cgpa').textContent = '8.5';
+    }
+  }
+
+  loadProfile();
+</script>
+</body>
+</html>

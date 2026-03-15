@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduParent — Student Academic Monitoring System</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1b35;
+    --navy-mid: #1a2d54;
+    --navy-light: #243760;
+    --teal: #00c9a7;
+    --teal-dark: #00a889;
+    --gold: #f5c842;
+    --light: #e8f0fe;
+    --text: #e2e8f4;
+    --muted: #8a9bb8;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --error: #ff6b6b;
+    --success: #00c9a7;
+    --bg-color: var(--navy);
+    --input-bg: rgba(255,255,255,0.05);
+  }
+
+  [data-theme="light"] {
+    --navy: #ffffff;
+    --navy-mid: #f5f5f5;
+    --navy-light: #eeeeee;
+    --teal: #000000;
+    --teal-dark: #333333;
+    --gold: #000000;
+    --light: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --card-bg: rgba(0,0,0,0.03);
+    --card-border: rgba(0,0,0,0.15);
+    --error: #dc2626;
+    --success: #000000;
+    --bg-color: #ffffff;
+    --input-bg: rgba(0,0,0,0.03);
+  }
+
+  [data-theme="bw"] {
+    --navy: #000000;
+    --navy-mid: #111111;
+    --navy-light: #222222;
+    --teal: #ffffff;
+    --teal-dark: #cccccc;
+    --gold: #ffffff;
+    --light: #ffffff;
+    --text: #ffffff;
+    --muted: #aaaaaa;
+    --card-bg: rgba(255,255,255,0.08);
+    --card-border: rgba(255,255,255,0.2);
+    --error: #ff4444;
+    --success: #ffffff;
+    --bg-color: #000000;
+    --input-bg: rgba(255,255,255,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color);
+    color: var(--text);
+    min-height: 100vh;
+    overflow-x: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* Navigation */
+  .navbar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 40px;
+    background: rgba(15, 27, 53, 0.9);
+    backdrop-filter: blur(20px);
+    z-index: 1000;
+    border-bottom: 1px solid var(--card-border);
+  }
+
+  [data-theme="light"] .navbar {
+    background: rgba(255, 255, 255, 0.95);
+  }
+
+  [data-theme="bw"] .navbar {
+    background: rgba(0, 0, 0, 0.95);
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+  }
+
+  .logo-text {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+  }
+
+  .nav-links {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+  }
+
+  .nav-links a {
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 500;
+    transition: color 0.3s;
+  }
+
+  .nav-links a:hover {
+    color: var(--teal);
+  }
+
+  .btn-nav {
+    padding: 10px 24px;
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-decoration: none;
+    border: none;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,201,167,0.4);
+  }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--text);
+  }
+
+  .btn-ghost:hover {
+    border-color: var(--teal);
+  }
+
+  /* Theme Toggle */
+  .theme-toggle {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    z-index: 1001;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.3s;
+    backdrop-filter: blur(10px);
+  }
+
+  .theme-toggle select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+  }
+
+  [data-theme="light"] .theme-toggle select option {
+    background: #ffffff;
+    color: #000000;
+  }
+
+  [data-theme="bw"] .theme-toggle select option {
+    background: #000000;
+    color: #ffffff;
+  }
+
+  /* Hero Section */
+  .hero {
+    padding: 140px 40px 80px;
+    text-align: center;
+    background: linear-gradient(180deg, var(--navy-mid) 0%, var(--bg-color) 100%);
+  }
+
+  .hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(0,201,167,0.1);
+    border: 1px solid rgba(0,201,167,0.2);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    color: var(--teal);
+    margin-bottom: 30px;
+  }
+
+  .hero h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem;
+    color: var(--text);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+
+  .hero p {
+    font-size: 1.25rem;
+    color: var(--muted);
+    max-width: 600px;
+    margin: 0 auto 40px;
+    line-height: 1.6;
+  }
+
+  .hero-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  .btn-large {
+    padding: 16px 40px;
+    border-radius: 12px;
+    font-size: 1.1rem;
+  }
+
+  /* Features Section */
+  .features {
+    padding: 80px 40px;
+  }
+
+  .section-header {
+    text-align: center;
+    margin-bottom: 60px;
+  }
+
+  .section-header h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.5rem;
+    color: var(--text);
+    margin-bottom: 16px;
+  }
+
+  .section-header p {
+    color: var(--muted);
+    font-size: 1.1rem;
+  }
+
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .feature-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 32px;
+    transition: all 0.3s;
+  }
+
+  .feature-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--teal);
+  }
+
+  .feature-icon {
+    width: 56px;
+    height: 56px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 20px;
+  }
+
+  .feature-card h3 {
+    font-size: 1.3rem;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  .feature-card p {
+    color: var(--muted);
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+
+  /* Stats Section */
+  .stats {
+    padding: 60px 40px;
+    background: var(--navy-mid);
+  }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 40px;
+    max-width: 1000px;
+    margin: 0 auto;
+    text-align: center;
+  }
+
+  .stat-item h3 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3rem;
+    color: var(--teal);
+    margin-bottom: 8px;
+  }
+
+  .stat-item p {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  /* Reviews Section */
+  .reviews {
+    padding: 80px 40px;
+  }
+
+  .reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+
+  .review-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 32px;
+  }
+
+  .stars {
+    color: var(--gold);
+    font-size: 1.2rem;
+    margin-bottom: 16px;
+  }
+
+  .review-card p {
+    color: var(--text);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    font-style: italic;
+  }
+
+  .reviewer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .reviewer-avatar {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+  }
+
+  .reviewer-info h4 {
+    color: var(--text);
+    font-size: 1rem;
+    margin-bottom: 4px;
+  }
+
+  .reviewer-info span {
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+
+  /* Login Options Section */
+  .login-options {
+    padding: 80px 40px;
+    background: var(--navy-mid);
+  }
+
+  .login-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 24px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .login-card {
+    background: var(--card-bg);
+    border: 2px solid var(--card-border);
+    border-radius: 16px;
+    padding: 32px 24px;
+    text-align: center;
+    transition: all 0.3s;
+    cursor: pointer;
+    text-decoration: none;
+    color: var(--text);
+    display: block;
+  }
+
+  .login-card:hover {
+    border-color: var(--teal);
+    transform: translateY(-3px);
+  }
+
+  .login-card.admin {
+    border-color: var(--gold);
+  }
+
+  .login-card.admin:hover {
+    background: rgba(245, 200, 66, 0.05);
+  }
+
+  .login-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--navy-light);
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin: 0 auto 20px;
+  }
+
+  .login-card h3 {
+    font-size: 1.3rem;
+    margin-bottom: 8px;
+  }
+
+  .login-card p {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Footer */
+  footer {
+    padding: 40px;
+    text-align: center;
+    border-top: 1px solid var(--card-border);
+  }
+
+  footer p {
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  /* Voice Assistant Styles */
+  .voice-assistant-fab {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: white;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0,201,167,0.4);
+    z-index: 1000;
+    transition: all 0.3s;
+    border: none;
+    outline: none;
+  }
+
+  .voice-assistant-fab:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 25px rgba(0,201,167,0.6);
+  }
+
+  .voice-assistant-fab.listening {
+    animation: pulseMic 1.5s infinite;
+    background: linear-gradient(135deg, #ff6b6b, #d63031);
+    box-shadow: 0 4px 20px rgba(255,107,107,0.4);
+  }
+
+  @keyframes pulseMic {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,107,107,0.7); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 15px rgba(255,107,107,0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(255,107,107,0); }
+  }
+
+  .voice-tooltip {
+    position: absolute;
+    bottom: 75px;
+    right: 0;
+    background: var(--navy-light);
+    color: white;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s;
+    pointer-events: none;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  .voice-assistant-fab:hover .voice-tooltip {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(-5px);
+  }
+
+  .voice-feedback {
+    position: fixed;
+    bottom: 100px;
+    right: 30px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    backdrop-filter: blur(10px);
+    padding: 15px 20px;
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 0.95rem;
+    max-width: 300px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+    z-index: 999;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  }
+
+  .voice-feedback.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .navbar {
+      padding: 15px 20px;
+    }
+
+    .nav-links {
+      display: none;
+    }
+
+    .theme-toggle {
+      top: 80px;
+      right: 15px;
+      padding: 6px 10px;
+      font-size: 0.8rem;
+    }
+
+    .voice-assistant-fab {
+      bottom: 20px;
+      right: 20px;
+      width: 50px;
+      height: 50px;
+    }
+
+    .voice-feedback {
+      bottom: 80px;
+      right: 15px;
+      left: 15px;
+      max-width: none;
+    }
+
+    .hero {
+      padding: 120px 20px 60px;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+    }
+
+    .hero p {
+      font-size: 1rem;
+    }
+
+    .features, .reviews, .login-options {
+      padding: 60px 20px;
+    }
+
+    .section-header h2 {
+      font-size: 2rem;
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- Theme Toggle -->
+  <div class="theme-toggle">
+    🎨 <select id="themeSelect" onchange="setTheme(this.value)">
+      <option value="dark">Dark (Navy)</option>
+      <option value="light">Light (White)</option>
+      <option value="bw">Black & White</option>
+    </select>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="navbar">
+    <div class="logo">
+      <div class="logo-icon">🎓</div>
+      <span class="logo-text">EduParent</span>
+    </div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#login">Login</a>
+      <a href="#reviews">Reviews</a>
+      <a href="/admin/login" class="btn-nav btn-ghost">Admin Portal</a>
+      <a href="/login" class="btn-nav btn-primary">Parent Login</a>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge">✨ Trusted by 500+ Parents & Students</div>
+    <h1>Student Academic<br>Monitoring System</h1>
+    <p>Stay connected with your child's academic journey. Real-time access to attendance, marks, fees, and instant AI-powered assistance through our smart chatbot.</p>
+    <div class="hero-buttons">
+      <a href="/login" class="btn-nav btn-primary btn-large">👨‍👩‍👧 Parent Login</a>
+      <a href="/admin/login" class="btn-nav btn-ghost btn-large">🔐 Admin Portal</a>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section class="features" id="features">
+    <div class="section-header">
+      <h2>Comprehensive Academic Monitoring</h2>
+      <p>Everything you need to track and support your child's educational progress</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">📊</div>
+        <h3>Attendance Tracking</h3>
+        <p>Monitor daily attendance, view subject-wise reports, and receive low attendance alerts before it's too late.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">📝</div>
+        <h3>Marks & Performance</h3>
+        <p>Access current CGPA, semester-wise results, subject-wise marks, and identify strong and weak areas.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⚠️</div>
+        <h3>Backlog Management</h3>
+        <p>Track backlogs, repeated subjects, and incomplete courses with clearance guidance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💰</div>
+        <h3>Fee Management</h3>
+        <p>Check fee payment status, view pending amounts, payment history, and scholarship eligibility.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🤖</div>
+        <h3>AI Chatbot Assistant</h3>
+        <p>Get instant answers about attendance, marks, fees, exams, and academic calendar through natural conversation.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <h3>Notifications & Alerts</h3>
+        <p>Stay updated with upcoming exams, assignment deadlines, fee due dates, and important announcements.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Stats Section -->
+  <section class="stats">
+    <div class="stats-grid">
+      <div class="stat-item">
+        <h3>2,000+</h3>
+        <p>Students Monitored</p>
+      </div>
+      <div class="stat-item">
+        <h3>1,500+</h3>
+        <p>Active Parents</p>
+      </div>
+      <div class="stat-item">
+        <h3>50+</h3>
+        <p>Faculty Members</p>
+      </div>
+      <div class="stat-item">
+        <h3>99.9%</h3>
+        <p>Uptime Guarantee</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Login Options Section -->
+  <section class="login-options" id="login">
+    <div class="section-header">
+      <h2>Choose Your Portal</h2>
+      <p>Select your role to access the appropriate dashboard</p>
+    </div>
+    <div class="login-grid">
+      <a href="/login" class="login-card">
+        <div class="login-icon">👨‍👩‍👧</div>
+        <h3>Parent Login</h3>
+        <p>View your child's academic progress, attendance, and fees</p>
+      </a>
+      <a href="/student/login" class="login-card">
+        <div class="login-icon">🎓</div>
+        <h3>Student Login</h3>
+        <p>Access your marks, attendance, and course information</p>
+      </a>
+      <a href="/faculty/login" class="login-card">
+        <div class="login-icon">👨‍🏫</div>
+        <h3>Faculty Login</h3>
+        <p>Manage attendance, upload marks, and view student reports</p>
+      </a>
+      <a href="/admin/login" class="login-card admin">
+        <div class="login-icon">🔐</div>
+        <h3>Admin Portal</h3>
+        <p>System management, user administration, and analytics</p>
+      </a>
+      <a href="/register" class="login-card" style="border-color: var(--teal);">
+        <div class="login-icon" style="background: var(--teal); color: var(--navy);">✨</div>
+        <h3>Register</h3>
+        <p>Create a new account for student, parent, faculty, or admin</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- Reviews Section -->
+  <section class="reviews" id="reviews">
+    <div class="section-header">
+      <h2>What Parents & Students Say</h2>
+      <p>Real feedback from our users</p>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"The chatbot is incredibly helpful! I can check my son's attendance and marks anytime without calling the college. The low attendance alerts helped us improve his attendance significantly."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">👨</div>
+          <div class="reviewer-info">
+            <h4>Rajesh Kumar</h4>
+            <span>Parent of CSE Student</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"As a class advisor, this system has made my work so much easier. I can quickly identify students with low attendance or backlogs and provide timely guidance. The analytics are excellent."</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">👩</div>
+          <div class="reviewer-info">
+            <h4>Dr. Priya Sharma</h4>
+            <span>Faculty, Department of CSE</span>
+          </div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="stars">★★★★★</div>
+        <p>"I love how I can track my own progress and see where I need to improve. The chatbot gives me instant answers about exams and my CGPA. It's like having a personal academic assistant!"</p>
+        <div class="reviewer">
+          <div class="reviewer-avatar">👨</div>
+          <div class="reviewer-info">
+            <h4>Arjun Mehta</h4>
+            <span>3rd Year CSE Student</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Voice Assistant -->
+  <button id="voiceBtn" class="voice-assistant-fab" aria-label="Voice Assistant">
+    🎤
+    <span class="voice-tooltip">Ask me anything!</span>
+  </button>
+  <div id="voiceFeedback" class="voice-feedback">
+    Listening...
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>© 2025 EduParent — Student Academic Monitoring System. Empowering education through technology.</p>
+  </footer>
+
+  <script>
+    // Theme management
+    function setTheme(theme) {
+      if (theme === 'dark') {
+        document.documentElement.removeAttribute('data-theme');
+      } else {
+        document.documentElement.setAttribute('data-theme', theme);
+      }
+      localStorage.setItem('theme', theme);
+    }
+
+    function loadTheme() {
+      const saved = localStorage.getItem('theme') || 'dark';
+      document.getElementById('themeSelect').value = saved;
+      setTheme(saved);
+    }
+
+    loadTheme();
+
+    // Voice Assistant Functionality
+    const voiceBtn = document.getElementById('voiceBtn');
+    const voiceFeedback = document.getElementById('voiceFeedback');
+    
+    // TTS
+    function speakGlobalText(text, callback) {
+      if (!('speechSynthesis' in window)) return;
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      if (callback) {
+        utterance.onend = callback;
+      }
+      window.speechSynthesis.speak(utterance);
+    }
+
+    // STT
+    const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRec) {
+      const recognition = new SpeechRec();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      recognition.onstart = function() {
+        voiceBtn.classList.add('listening');
+        voiceFeedback.textContent = 'Listening...';
+        voiceFeedback.classList.add('show');
+      };
+
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript.toLowerCase();
+        voiceFeedback.textContent = `You said: "${transcript}"`;
+        
+        let responseText = "I'm sorry, I didn't catch that. You can say things like 'Open parent portal', 'Go to registration', or 'What features are available?'.";
+        let redirectUrl = null;
+
+        // Portal navigation commands
+        if (transcript.includes("open") || transcript.includes("go to") || transcript.includes("navigate")) {
+          if (transcript.includes("parent") || transcript.includes("family")) {
+            responseText = "Opening Parent Portal. Please login to access your child's academic information.";
+            redirectUrl = "/login";
+          } else if (transcript.includes("student")) {
+            responseText = "Opening Student Portal. Students can view their attendance, marks, and CGPA here.";
+            redirectUrl = "/student/login";
+          } else if (transcript.includes("faculty") || transcript.includes("teacher") || transcript.includes("professor")) {
+            responseText = "Opening Faculty Portal. Faculty members can manage students and enter marks here.";
+            redirectUrl = "/faculty/login";
+          } else if (transcript.includes("admin")) {
+            responseText = "Opening Admin Portal. Administrators can manage all users and data here.";
+            redirectUrl = "/admin/login";
+          } else if (transcript.includes("home") || transcript.includes("main page")) {
+            responseText = "You are already on the home page!";
+          } else if (transcript.includes("chat") || transcript.includes("chatbot")) {
+            responseText = "Please login first to access the chatbot. I'll take you to parent login.";
+            redirectUrl = "/login";
+          }
+        }
+        // Login commands
+        else if (transcript.includes("login") || transcript.includes("sign in")) {
+          if (transcript.includes("parent")) {
+            responseText = "Navigating to Parent Login.";
+            redirectUrl = "/login";
+          } else if (transcript.includes("student")) {
+            responseText = "Navigating to Student Login.";
+            redirectUrl = "/student/login";
+          } else if (transcript.includes("faculty") || transcript.includes("teacher")) {
+            responseText = "Navigating to Faculty Login.";
+            redirectUrl = "/faculty/login";
+          } else if (transcript.includes("admin")) {
+            responseText = "Navigating to Admin Portal.";
+            redirectUrl = "/admin/login";
+          } else {
+            responseText = "Please specify if you are a parent, student, or faculty. Navigating to parent login by default.";
+            redirectUrl = "/login";
+          }
+        } 
+        // Registration commands
+        else if (transcript.includes("register") || transcript.includes("sign up") || transcript.includes("create account") || transcript.includes("new account")) {
+          responseText = "Opening registration page. You can create a new account for student, parent, or faculty.";
+          redirectUrl = "/register";
+        }
+        // Information commands
+        else if (transcript.includes("what is") || transcript.includes("about") || transcript.includes("tell me about")) {
+          if (transcript.includes("eduparent") || transcript.includes("this") || transcript.includes("system")) {
+            responseText = "EduParent is a Student Academic Monitoring System. It allows parents to stay connected with their child's academic journey, tracking attendance, marks, fees, and backlogs in real-time. Parents can also chat with our AI assistant for instant help.";
+          } else if (transcript.includes("attendance")) {
+            responseText = "The attendance tracking feature allows parents to view their child's overall attendance percentage, subject-wise attendance, and get alerts for low attendance below 75%.";
+          } else if (transcript.includes("marks") || transcript.includes("grades")) {
+            responseText = "The marks feature shows subject-wise marks, grades, CGPA, and semester-wise performance analysis for your child.";
+          } else if (transcript.includes("fee") || transcript.includes("fees")) {
+            responseText = "The fee management feature displays fee status, payment history, pending amounts, and due dates for your child's academic fees.";
+          } else if (transcript.includes("backlog")) {
+            responseText = "Backlog tracking shows subjects your child needs to reappear for, with details on pending exams and preparation suggestions.";
+          } else if (transcript.includes("chatbot") || transcript.includes("assistant")) {
+            responseText = "Our AI chatbot helps parents get instant answers about attendance, marks, fees, faculty contacts, and more. Just type or speak your question!";
+          }
+        }
+        // Features command
+        else if (transcript.includes("features") || transcript.includes("what can") || transcript.includes("capabilities")) {
+          responseText = "EduParent offers: Attendance Tracking with low attendance alerts, Marks and CGPA monitoring, Backlog Management, Fee Status and Payment History, Faculty Contact Information, Academic Calendar, Performance Insights, and an AI Chatbot Assistant for instant help.";
+          window.location.hash = "#features";
+        }
+        // Help command
+        else if (transcript.includes("help") || transcript.includes("commands") || transcript.includes("what can i say")) {
+          responseText = "You can say: Open parent portal, Open student portal, Go to registration, Tell me about attendance, What are the features, or ask about any specific feature like marks, fees, or backlogs.";
+        }
+        // Contact support
+        else if (transcript.includes("contact") || transcript.includes("support") || transcript.includes("help desk")) {
+          responseText = "For support, please contact the admin at admin@college.edu or call 9000000000. You can also use the chatbot after logging in for instant assistance.";
+        }
+        // Greetings
+        else if (transcript.includes("hello") || transcript.includes("hi") || transcript.includes("hey")) {
+          responseText = "Hello! Welcome to EduParent. How can I help you today? You can ask me to open portals, register, or learn about our features.";
+        }
+        // Thank you
+        else if (transcript.includes("thank") || transcript.includes("thanks")) {
+          responseText = "You're welcome! Is there anything else I can help you with?";
+        }
+
+        setTimeout(() => {
+          voiceFeedback.textContent = responseText;
+          speakGlobalText(responseText, () => {
+             if (redirectUrl) {
+                window.location.href = redirectUrl;
+             }
+          });
+          
+          setTimeout(() => {
+            voiceFeedback.classList.remove('show');
+          }, 3000);
+        }, 800);
+      };
+
+      recognition.onspeechend = function() {
+        recognition.stop();
+        voiceBtn.classList.remove('listening');
+      };
+
+      recognition.onerror = function(event) {
+        console.error("Home Speech recognition error", event.error);
+        voiceBtn.classList.remove('listening');
+        voiceFeedback.textContent = "I couldn't hear you clearly.";
+        setTimeout(() => {
+          voiceFeedback.classList.remove('show');
+        }, 2000);
+      };
+
+      voiceBtn.addEventListener('click', () => {
+        if (voiceBtn.classList.contains('listening')) {
+          recognition.stop();
+        } else {
+          recognition.start();
+        }
+      });
+    } else {
+      voiceBtn.style.display = 'none';
+      console.warn("Speech Recognition API not supported in this browser.");
+    }
+  </script>
+</body>
+</html>

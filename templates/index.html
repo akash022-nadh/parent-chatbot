@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduParent — Secure Parent Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Dark mode (default) - Navy theme */
+    --navy: #0f1b35;
+    --navy-mid: #1a2d54;
+    --teal: #00c9a7;
+    --teal-dark: #00a889;
+    --gold: #f5c842;
+    --light: #e8f0fe;
+    --text: #e2e8f4;
+    --muted: #8a9bb8;
+    --card-bg: transparent;
+    --card-border: rgba(255,255,255,0.12);
+    --error: #ff6b6b;
+    --success: #00c9a7;
+    --bg-color: var(--navy);
+    --input-bg: rgba(255,255,255,0.08);
+  }
+
+  /* Light mode - Black & White */
+  [data-theme="light"] {
+    --navy: #ffffff;
+    --navy-mid: #f5f5f5;
+    --teal: #1a1a1a;
+    --teal-dark: #333333;
+    --gold: #1a1a1a;
+    --light: #1a1a1a;
+    --text: #1a1a1a;
+    --muted: #666666;
+    --card-bg: transparent;
+    --card-border: rgba(0,0,0,0.12);
+    --error: #dc2626;
+    --success: #1a1a1a;
+    --bg-color: #ffffff;
+    --input-bg: rgba(0,0,0,0.05);
+  }
+
+  /* Black & White high contrast mode */
+  [data-theme="bw"] {
+    --navy: #000000;
+    --navy-mid: #111111;
+    --teal: #ffffff;
+    --teal-dark: #cccccc;
+    --gold: #ffffff;
+    --light: #ffffff;
+    --text: #ffffff;
+    --muted: #aaaaaa;
+    --card-bg: transparent;
+    --card-border: rgba(255,255,255,0.15);
+    --error: #ff4444;
+    --success: #ffffff;
+    --bg-color: #000000;
+    --input-bg: rgba(255,255,255,0.1);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 20px;
+    position: relative;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* Background decoration */
+  body::before {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,201,167,0.12) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    width: 400px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,200,66,0.08) 0%, transparent 70%);
+    bottom: -100px; left: -100px;
+    pointer-events: none;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 460px;
+    padding: 20px;
+    z-index: 1;
+    animation: fadeUp 0.7s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(30px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .brand {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .brand-icon {
+    width: 64px; height: 64px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 18px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin-bottom: 16px;
+    box-shadow: 0 8px 32px rgba(0,201,167,0.3);
+  }
+
+  .brand h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    color: var(--text);
+    letter-spacing: -0.5px;
+  }
+
+  .brand p {
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-top: 6px;
+    font-weight: 300;
+  }
+
+  .card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 36px 32px;
+    backdrop-filter: blur(20px);
+    box-shadow: 0 24px 64px rgba(0,0,0,0.3);
+  }
+
+  .step {
+    display: none;
+    animation: stepIn 0.4s ease both;
+  }
+  .step.active { display: block; }
+
+  @keyframes stepIn {
+    from { opacity: 0; transform: translateX(20px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+
+  .step-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--card-border);
+    transition: all 0.3s;
+  }
+  .step-dot.done { background: var(--teal); }
+  .step-dot.current { background: var(--gold); width: 24px; border-radius: 4px; }
+
+  .step-line {
+    flex: 1;
+    height: 1px;
+    background: var(--card-border);
+  }
+
+  h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.5rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .step-desc {
+    color: var(--muted);
+    font-size: 0.88rem;
+    margin-bottom: 24px;
+    line-height: 1.5;
+  }
+
+  .input-group {
+    margin-bottom: 16px;
+  }
+
+  label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 8px;
+  }
+
+  input {
+    width: 100%;
+    padding: 14px 16px;
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 12px;
+    color: var(--text);
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    outline: none;
+  }
+  [data-theme="light"] input {
+    background: #f0f0f0;
+  }
+
+  input::placeholder { color: var(--muted); }
+  input:focus {
+    border-color: var(--teal);
+    background: rgba(0,201,167,0.05);
+    box-shadow: 0 0 0 3px rgba(0,201,167,0.1);
+  }
+  input.error { border-color: var(--error); }
+
+  .btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-top: 8px;
+    letter-spacing: 0.3px;
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(0,201,167,0.3);
+  }
+  .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 8px 28px rgba(0,201,167,0.4); }
+  .btn-primary:active { transform: translateY(0); }
+  .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--card-border);
+    color: var(--muted);
+    margin-top: 12px;
+  }
+  .btn-ghost:hover { border-color: var(--muted); color: var(--text); }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 0.88rem;
+    margin-bottom: 16px;
+    display: none;
+  }
+  .alert.show { display: block; }
+  .alert-error { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); color: #ff9999; }
+  .alert-success { background: rgba(0,201,167,0.1); border: 1px solid rgba(0,201,167,0.3); color: var(--teal); }
+
+  .verified-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0,201,167,0.1);
+    border: 1px solid rgba(0,201,167,0.3);
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: var(--teal);
+    margin-bottom: 20px;
+  }
+
+  .otp-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+
+  .otp-input {
+    text-align: center;
+    font-size: 1.4rem;
+    font-weight: 600;
+    padding: 14px 0;
+    border-radius: 12px;
+  }
+
+  .resend-row {
+    text-align: center;
+    font-size: 0.85rem;
+    color: var(--muted);
+    margin-top: 12px;
+  }
+
+  .resend-btn {
+    background: none;
+    border: none;
+    color: var(--teal);
+    cursor: pointer;
+    font-size: 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: underline;
+  }
+
+  .demo-hint {
+    background: rgba(245,200,66,0.08);
+    border: 1px solid rgba(245,200,66,0.2);
+    border-radius: 10px;
+    padding: 10px 14px;
+    font-size: 0.82rem;
+    color: var(--gold);
+    margin-top: 16px;
+    line-height: 1.5;
+  }
+
+  .demo-hint strong { font-weight: 600; }
+
+  /* Theme Toggle Button */
+  .theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.3s;
+    white-space: nowrap;
+  }
+  .theme-toggle:hover {
+    border-color: var(--teal);
+    background: var(--card-bg);
+  }
+  .theme-toggle select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+  }
+  /* Ensure select options are visible in all themes */
+  [data-theme="light"] .theme-toggle select option {
+    background: #ffffff;
+    color: #000000;
+  }
+  [data-theme="bw"] .theme-toggle select option {
+    background: #000000;
+    color: #ffffff;
+  }
+  /* Light mode specific toggle styling */
+  [data-theme="light"] .theme-toggle {
+    background: #f0f0f0;
+    border-color: #000000;
+    color: #000000;
+  }
+  [data-theme="light"] .theme-toggle select {
+    color: #000000;
+    background: #f0f0f0;
+  }
+  /* B&W mode specific toggle styling */
+  [data-theme="bw"] .theme-toggle {
+    background: #000000;
+    border-color: #ffffff;
+    color: #ffffff;
+  }
+  [data-theme="bw"] .theme-toggle select {
+    color: #ffffff;
+  }
+
+  .loader {
+    display: inline-block;
+    width: 16px; height: 16px;
+    border: 2px solid rgba(255,255,255,0.3);
+    border-top-color: #fff;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+    vertical-align: middle;
+    margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="theme-toggle">
+  🎨 <select id="themeSelect" onchange="setTheme(this.value)">
+    <option value="dark">Dark (Navy)</option>
+    <option value="light">Light (White)</option>
+    <option value="bw">Black & White</option>
+  </select>
+</div>
+<div class="container">
+  <div class="brand">
+    <div class="brand-icon">🎓</div>
+    <h1>EduParent</h1>
+    <p>Secure Parent Information Portal</p>
+  </div>
+
+  <div class="card">
+    <!-- STEP 1: Enter Reg No -->
+    <div class="step active" id="step1">
+      <div class="step-indicator">
+        <div class="step-dot current"></div>
+        <div class="step-line"></div>
+        <div class="step-dot"></div>
+        <div class="step-line"></div>
+        <div class="step-dot"></div>
+      </div>
+      <h2>Student Registration</h2>
+      <p class="step-desc">Enter your child's registration number to begin the verification process.</p>
+      <div class="alert alert-error" id="err1"></div>
+      <div class="input-group">
+        <label>Registration Number</label>
+        <input type="text" id="regNo" placeholder="e.g. STU001" autocomplete="off" spellcheck="false">
+      </div>
+      <button class="btn btn-primary" id="btnStep1" onclick="verifyReg()">Verify Registration →</button>
+      <div class="demo-hint">
+        <strong>Demo credentials:</strong><br>
+        Reg No: STU001, STU002, STU003, STU004, or STU005<br>
+        Phone: matching parent phone (see README)
+      </div>
+    </div>
+
+    <!-- STEP 2: Enter Phone -->
+    <div class="step" id="step2">
+      <div class="step-indicator">
+        <div class="step-dot done">✓</div>
+        <div class="step-line"></div>
+        <div class="step-dot current"></div>
+        <div class="step-line"></div>
+        <div class="step-dot"></div>
+      </div>
+      <div class="verified-badge" id="studentBadge">✅ STU001 — Arjun Mehta</div>
+      <h2>Phone Verification</h2>
+      <p class="step-desc">Enter your registered phone number. An OTP will be sent for verification.</p>
+      <div class="alert alert-error" id="err2"></div>
+      <div class="input-group">
+        <label>Registered Phone Number</label>
+        <input type="tel" id="phone" placeholder="Enter 10-digit number" maxlength="10">
+      </div>
+      <button class="btn btn-primary" id="btnStep2" onclick="sendOTP()">Send OTP →</button>
+      <button class="btn btn-ghost" onclick="goBack(1)">← Back</button>
+    </div>
+
+    <!-- STEP 3: Enter OTP -->
+    <div class="step" id="step3">
+      <div class="step-indicator">
+        <div class="step-dot done"></div>
+        <div class="step-line"></div>
+        <div class="step-dot done"></div>
+        <div class="step-line"></div>
+        <div class="step-dot current"></div>
+      </div>
+      <h2>Enter OTP</h2>
+      <p class="step-desc">A 6-digit OTP has been sent to your registered number. It expires in 5 minutes.</p>
+      <div class="alert alert-error" id="err3"></div>
+      <div class="alert alert-success" id="success3"></div>
+      <div class="otp-grid" id="otpGrid">
+        <input type="text" class="otp-input" maxlength="1" oninput="otpInput(this,0)" onkeydown="otpKey(event,0)">
+        <input type="text" class="otp-input" maxlength="1" oninput="otpInput(this,1)" onkeydown="otpKey(event,1)">
+        <input type="text" class="otp-input" maxlength="1" oninput="otpInput(this,2)" onkeydown="otpKey(event,2)">
+        <input type="text" class="otp-input" maxlength="1" oninput="otpInput(this,3)" onkeydown="otpKey(event,3)">
+        <input type="text" class="otp-input" maxlength="1" oninput="otpInput(this,4)" onkeydown="otpKey(event,4)">
+        <input type="text" class="otp-input" maxlength="1" oninput="otpInput(this,5)" onkeydown="otpKey(event,5)">
+      </div>
+      <button class="btn btn-primary" id="btnStep3" onclick="verifyOTP()">Verify & Login →</button>
+      <button class="btn btn-ghost" onclick="goBack(2)">← Back</button>
+      <a href="/register" style="display:block;text-align:center;margin-top:15px;color:var(--teal);text-decoration:none;font-size:0.9rem;">Don't have an account? Register here</a>
+      <div class="resend-row">Didn't get OTP? <button class="resend-btn" onclick="sendOTP()">Resend</button></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // Theme management
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  function loadTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.getElementById('themeSelect').value = saved;
+    setTheme(saved);
+  }
+
+  // Load theme on page load
+  loadTheme();
+
+  let currentReg = '', currentPhone = '', demoOTP = '';
+
+  function showStep(n) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    document.getElementById('step' + n).classList.add('active');
+  }
+
+  function goBack(n) { showStep(n); }
+
+  function setLoading(btnId, loading, text) {
+    const btn = document.getElementById(btnId);
+    btn.disabled = loading;
+    btn.innerHTML = loading ? `<span class="loader"></span> Processing...` : text;
+  }
+
+  function showError(id, msg) {
+    const el = document.getElementById(id);
+    el.textContent = msg;
+    el.classList.add('show');
+    el.className = 'alert alert-error show';
+  }
+
+  function clearError(id) {
+    const el = document.getElementById(id);
+    el.classList.remove('show');
+  }
+
+  async function verifyReg() {
+    const reg = document.getElementById('regNo').value.trim().toUpperCase();
+    if (!reg) { showError('err1', 'Please enter registration number.'); return; }
+    clearError('err1');
+    setLoading('btnStep1', true, 'Verify Registration →');
+    try {
+      const res = await fetch('/api/verify_reg', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ reg_no: reg })
+      });
+      const data = await res.json();
+      if (data.success) {
+        currentReg = reg;
+        document.getElementById('studentBadge').textContent = `✅ ${reg} — ${data.student_name} (${data.branch})`;
+        showStep(2);
+      } else {
+        showError('err1', data.message);
+      }
+    } catch { showError('err1', 'Connection error. Please try again.'); }
+    setLoading('btnStep1', false, 'Verify Registration →');
+  }
+
+  async function sendOTP() {
+    const phone = document.getElementById('phone').value.trim();
+    if (phone.length < 10) { showError('err2', 'Please enter a valid 10-digit phone number.'); return; }
+    clearError('err2');
+    setLoading('btnStep2', true, 'Send OTP →');
+    try {
+      const res = await fetch('/api/send_otp', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ reg_no: currentReg, phone })
+      });
+      const data = await res.json();
+      if (data.success) {
+        currentPhone = phone;
+        demoOTP = data.demo_otp;
+        showStep(3);
+        // Auto-fill for demo
+        if (demoOTP) {
+          setTimeout(() => {
+            const inputs = document.querySelectorAll('.otp-input');
+            demoOTP.split('').forEach((d, i) => { inputs[i].value = d; });
+            const el = document.getElementById('success3');
+            el.textContent = `Demo OTP: ${demoOTP} (auto-filled)`;
+            el.classList.add('show');
+          }, 300);
+        }
+      } else {
+        showError('err2', data.message || 'Failed to send OTP. Please check your phone number.');
+      }
+    } catch (err) {
+      console.error('OTP error:', err);
+      showError('err2', 'Connection error. Please access via http://localhost:5000');
+    }
+    setLoading('btnStep2', false, 'Send OTP →');
+  }
+
+  function otpInput(el, idx) {
+    el.value = el.value.replace(/\D/g, '');
+    if (el.value && idx < 5) {
+      document.querySelectorAll('.otp-input')[idx + 1].focus();
+    }
+  }
+
+  function otpKey(e, idx) {
+    if (e.key === 'Backspace' && !e.target.value && idx > 0) {
+      document.querySelectorAll('.otp-input')[idx - 1].focus();
+    }
+  }
+
+  async function verifyOTP() {
+    const inputs = document.querySelectorAll('.otp-input');
+    const otp = Array.from(inputs).map(i => i.value).join('');
+    if (otp.length < 6) { showError('err3', 'Please enter all 6 digits.'); return; }
+    clearError('err3');
+    setLoading('btnStep3', true, 'Verify & Login →');
+    try {
+      const res = await fetch('/api/verify_otp', {
+        method: 'POST', headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ reg_no: currentReg, phone: currentPhone, otp })
+      });
+      const data = await res.json();
+      if (data.success) {
+        window.location.href = '/chat';
+      } else {
+        showError('err3', data.message);
+      }
+    } catch { showError('err3', 'Connection error.'); }
+    setLoading('btnStep3', false, 'Verify & Login →');
+  }
+
+  // Enter key support
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      const s1 = document.getElementById('step1');
+      const s2 = document.getElementById('step2');
+      const s3 = document.getElementById('step3');
+      if (s1.classList.contains('active')) verifyReg();
+      else if (s2.classList.contains('active')) sendOTP();
+      else if (s3.classList.contains('active')) verifyOTP();
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EduParent — Chat</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* Dark mode (default) - Navy theme */
+    --navy: #0f1b35;
+    --navy-mid: #1a2d54;
+    --navy-light: #243760;
+    --teal: #00c9a7;
+    --teal-dark: #00a889;
+    --gold: #f5c842;
+    --text: #e2e8f4;
+    --muted: #8a9bb8;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --bot-bg: rgba(26,45,84,0.9);
+    --user-bg: linear-gradient(135deg, #00c9a7, #00a889);
+    --error: #ff6b6b;
+    --bg-color: var(--navy);
+    --input-bg: rgba(255,255,255,0.05);
+  }
+
+  /* Light mode - Black & White */
+  [data-theme="light"] {
+    --navy: #ffffff;
+    --navy-mid: #f5f5f5;
+    --navy-light: #eeeeee;
+    --teal: #000000;
+    --teal-dark: #333333;
+    --gold: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --card-bg: rgba(0,0,0,0.03);
+    --card-border: rgba(0,0,0,0.15);
+    --bot-bg: rgba(240,240,240,0.95);
+    --user-bg: linear-gradient(135deg, #333333, #000000);
+    --error: #dc2626;
+    --bg-color: #ffffff;
+    --input-bg: #f0f0f0;
+  }
+
+  /* Black & White high contrast mode */
+  [data-theme="bw"] {
+    --navy: #000000;
+    --navy-mid: #111111;
+    --navy-light: #222222;
+    --teal: #ffffff;
+    --teal-dark: #cccccc;
+    --gold: #ffffff;
+    --text: #ffffff;
+    --muted: #aaaaaa;
+    --card-bg: rgba(255,255,255,0.08);
+    --card-border: rgba(255,255,255,0.2);
+    --bot-bg: rgba(30,30,30,0.95);
+    --user-bg: linear-gradient(135deg, #ffffff, #cccccc);
+    --error: #ff4444;
+    --bg-color: #000000;
+    --input-bg: rgba(255,255,255,0.08);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color);
+    color: var(--text);
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    transition: background 0.3s, color 0.3s;
+  }
+
+  /* Theme Toggle Button */
+  .theme-toggle {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    padding: 6px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.3s;
+    margin-left: 8px;
+    white-space: nowrap;
+    backdrop-filter: blur(10px);
+  }
+  .theme-toggle:hover {
+    border-color: var(--teal);
+    background: var(--card-bg);
+    transform: scale(1.02);
+  }
+  .theme-toggle select {
+    background: transparent;
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    padding-right: 4px;
+    min-width: 60px;
+  }
+  /* Ensure select options are visible in all themes */
+  [data-theme="light"] .theme-toggle select option {
+    background: #ffffff;
+    color: #000000;
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+  [data-theme="bw"] .theme-toggle select option {
+    background: #000000;
+    color: #ffffff;
+    font-size: 0.9rem;
+    padding: 8px;
+  }
+  /* Light mode specific toggle styling */
+  [data-theme="light"] .theme-toggle {
+    background: #ffffff;
+    border: 2px solid #000000;
+    color: #000000;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  [data-theme="light"] .theme-toggle select {
+    color: #000000;
+    background: #ffffff;
+  }
+  /* B&W mode specific toggle styling */
+  [data-theme="bw"] .theme-toggle {
+    background: #000000;
+    border: 2px solid #ffffff;
+    color: #ffffff;
+    box-shadow: 0 2px 8px rgba(255,255,255,0.2);
+  }
+  [data-theme="bw"] .theme-toggle select {
+    color: #ffffff;
+    background: #000000;
+  }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    padding: 14px 20px;
+    background: var(--navy-mid);
+    border-bottom: 1px solid var(--card-border);
+    gap: 14px;
+    z-index: 10;
+    flex-shrink: 0;
+  }
+
+  .header-avatar {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 14px rgba(0,201,167,0.25);
+  }
+
+  .header-info h3 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .header-info p {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .online-dot {
+    display: inline-block;
+    width: 7px; height: 7px;
+    background: var(--teal);
+    border-radius: 50%;
+    margin-right: 5px;
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .header-actions {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .student-chip {
+    background: rgba(0,201,167,0.1);
+    border: 1px solid rgba(0,201,167,0.2);
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 0.78rem;
+    color: var(--teal);
+    font-weight: 500;
+  }
+
+  .logout-btn {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid rgba(255,107,107,0.2);
+    border-radius: 8px;
+    padding: 7px 12px;
+    font-size: 0.78rem;
+    color: #ff9999;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .logout-btn:hover { background: rgba(255,107,107,0.2); }
+
+  /* Chat area */
+  .chat-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    scroll-behavior: smooth;
+  }
+
+  .chat-body::-webkit-scrollbar { width: 4px; }
+  .chat-body::-webkit-scrollbar-track { background: transparent; }
+  .chat-body::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }
+
+  .msg-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+    animation: msgIn 0.3s ease both;
+    max-width: 88%;
+  }
+
+  @keyframes msgIn {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .msg-row.user { margin-left: auto; flex-direction: row-reverse; }
+
+  .msg-avatar {
+    width: 30px; height: 30px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+  }
+
+  .msg-avatar.bot { background: var(--navy-light); }
+  .msg-avatar.user { background: var(--teal-dark); }
+
+  .msg-bubble {
+    padding: 12px 16px;
+    border-radius: 18px;
+    font-size: 0.9rem;
+    line-height: 1.6;
+    max-width: 100%;
+    word-break: break-word;
+  }
+
+  .bot .msg-bubble {
+    background: var(--bot-bg);
+    border: 1px solid var(--card-border);
+    border-bottom-left-radius: 6px;
+    color: var(--text);
+    overflow-x: auto;
+  }
+
+  .user .msg-bubble {
+    background: var(--user-bg);
+    border-bottom-right-radius: 6px;
+    color: #fff;
+    font-weight: 500;
+  }
+
+  .msg-bubble b { color: var(--text); font-weight: 600; }
+  .user .msg-bubble b { color: #fff; }
+  .msg-bubble i { color: var(--muted); font-size: 0.82rem; }
+
+  /* Tables in bot messages */
+  .msg-bubble .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.85rem;
+    margin: 10px 0;
+  }
+  .msg-bubble .data-table th,
+  .msg-bubble .data-table td {
+    border: 1px solid var(--card-border);
+    padding: 8px 10px;
+    text-align: left;
+  }
+  .msg-bubble .data-table th {
+    background: rgba(0,201,167,0.12);
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .msg-bubble .data-table tbody tr:hover {
+    background: rgba(255,255,255,0.03);
+  }
+  .msg-bubble .data-table .gpa-bar { font-family: monospace; letter-spacing: 1px; }
+  .msg-bubble small { color: var(--muted); font-size: 0.8rem; display: block; margin-top: 6px; }
+
+  /* Semester toggle buttons */
+  .sem-tabs {
+    display: flex;
+    gap: 8px;
+    margin: 10px 0;
+    flex-wrap: wrap;
+  }
+  .sem-toggle {
+    background: rgba(255,255,255,0.06);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+  }
+  .sem-toggle:hover {
+    background: rgba(0,201,167,0.1);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+  .sem-toggle.active {
+    background: rgba(0,201,167,0.2);
+    border-color: var(--teal);
+    color: var(--teal);
+    font-weight: 600;
+  }
+  .sem-view { margin-top: 4px; }
+
+  .msg-time {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 4px;
+    padding: 0 4px;
+  }
+
+  /* Typing indicator */
+  .typing-row {
+    display: none;
+    align-items: flex-end;
+    gap: 8px;
+    max-width: 88%;
+  }
+  .typing-row.visible { display: flex; animation: msgIn 0.3s ease both; }
+
+  .typing-bubble {
+    background: var(--bot-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 18px;
+    border-bottom-left-radius: 6px;
+    padding: 14px 18px;
+    display: flex;
+    gap: 5px;
+    align-items: center;
+  }
+
+  .typing-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--muted);
+    animation: typingBounce 1.2s infinite;
+  }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes typingBounce {
+    0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+    30% { transform: translateY(-6px); opacity: 1; }
+  }
+
+  /* Quick replies */
+  .quick-replies {
+    flex-shrink: 0;
+    padding: 10px 16px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    background: var(--navy);
+    border-top: 1px solid var(--card-border);
+  }
+
+  .qr-label {
+    width: 100%;
+    font-size: 0.75rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 2px;
+  }
+
+  .qr-btn {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 0.82rem;
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .qr-btn:hover {
+    background: rgba(0,201,167,0.1);
+    border-color: var(--teal);
+    color: var(--teal);
+  }
+
+  /* Input area */
+  .input-area {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    background: var(--navy-mid);
+    border-top: 1px solid var(--card-border);
+    flex-shrink: 0;
+  }
+
+  #messageInput {
+    flex: 1;
+    background: var(--input-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 12px 20px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.92rem;
+    outline: none;
+    transition: all 0.2s;
+  }
+  [data-theme="light"] #messageInput {
+    background: #f5f5f5;
+  }
+  #messageInput::placeholder { color: var(--muted); }
+  #messageInput:focus {
+    border-color: var(--teal);
+    background: rgba(0,201,167,0.05);
+  }
+
+  .send-btn {
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--teal), var(--teal-dark));
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(0,201,167,0.3);
+  }
+  .send-btn:hover { transform: scale(1.05); box-shadow: 0 6px 18px rgba(0,201,167,0.4); }
+  .send-btn svg { width: 20px; height: 20px; fill: #fff; }
+
+  /* Welcome message */
+  .welcome-banner {
+    text-align: center;
+    padding: 20px 16px;
+    animation: fadeUp 0.6s ease both;
+  }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .welcome-banner .icon { font-size: 3rem; margin-bottom: 12px; }
+  .welcome-banner h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.4rem;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .welcome-banner p { color: var(--muted); font-size: 0.9rem; }
+
+  @media (max-width: 480px) {
+    .student-chip { display: none; }
+    .msg-row { max-width: 95%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-avatar">🎓</div>
+  <div class="header-info">
+    <h3>EduParent Assistant</h3>
+    <p><span class="online-dot"></span>Online — Secured Session</p>
+  </div>
+  <div class="header-actions">
+    <div class="student-chip">📋 {{ reg_no }}</div>
+    <div class="theme-toggle">
+      🎨 <select id="themeSelect" onchange="setTheme(this.value)">
+        <option value="dark">Dark</option>
+        <option value="light">Light</option>
+        <option value="bw">B&W</option>
+      </select>
+    </div>
+    <button class="logout-btn" onclick="doLogout()">🚪 Logout</button>
+  </div>
+</div>
+
+<div class="chat-body" id="chatBody">
+  <div class="welcome-banner">
+    <div class="icon">👋</div>
+    <h2>Hello, {{ student_name }}'s Parent!</h2>
+    <p>I'm here to help you track your child's academic progress.<br>Use the quick replies below or type any question.</p>
+  </div>
+</div>
+
+<div class="typing-row" id="typingRow">
+  <div class="msg-avatar bot">🤖</div>
+  <div class="typing-bubble">
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+    <div class="typing-dot"></div>
+  </div>
+</div>
+
+<div class="quick-replies" id="quickReplies">
+  <div class="qr-label">Quick actions</div>
+  <button class="qr-btn" onclick="sendQuick('Show attendance')">📊 Attendance</button>
+  <button class="qr-btn" onclick="sendQuick('Show marks')">📝 Marks</button>
+  <button class="qr-btn" onclick="sendQuick('Show CGPA')">🎓 CGPA</button>
+  <button class="qr-btn" onclick="sendQuick('Year CGPA')">📈 Year CGPA</button>
+  <button class="qr-btn" onclick="sendQuick('Backlogs')">⚠️ Backlogs</button>
+  <button class="qr-btn" onclick="sendQuick('Fee status')">💰 Fees</button>
+  <button class="qr-btn" onclick="sendQuick('Notifications')">🔔 Alerts</button>
+  <button class="qr-btn" onclick="sendQuick('Performance insights')">💡 Insights</button>
+  <button class="qr-btn" onclick="sendQuick('Suggestions')">📋 Suggestions</button>
+  <button class="qr-btn" onclick="sendQuick('Class advisor')">👨‍🏫 Advisor</button>
+  <button class="qr-btn" onclick="sendQuick('Counselor')">🧑‍⚕️ Counselor</button>
+  <button class="qr-btn" onclick="sendQuick('Faculty contacts')">� Faculty</button>
+  <button class="qr-btn" onclick="sendQuick('Academic calendar')">📅 Calendar</button>
+  <button class="qr-btn" onclick="sendQuick('Low attendance alert')">🔴 Low Att.</button>
+  <button class="qr-btn" onclick="sendQuick('Scholarship status')">🏅 Scholarship</button>
+  <button class="qr-btn" onclick="sendQuick('Course status')">📋 Course</button>
+  <button class="qr-btn" onclick="sendQuick('Year-wise data')">📊 Year Data</button>
+  <button class="qr-btn" onclick="sendQuick('Repeated subjects')">🔄 Repeated</button>
+  <button class="qr-btn" onclick="sendQuick('Incomplete subjects')">⏳ Incomplete</button>
+</div>
+
+<div class="input-area">
+  <button id="micBtn" class="qr-btn" title="Click to speak" style="background: var(--card-bg); border-color: var(--teal); border-radius: 50%; width: 46px; height: 46px; padding: 0; display: flex; align-items: center; justify-content: center; font-size: 1.2rem;">
+    🎤
+  </button>
+  <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off" spellcheck="false">
+  <button class="send-btn" onclick="sendMessage()">
+    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+  </button>
+</div>
+
+<script>
+  // Theme management
+  function setTheme(theme) {
+    if (theme === 'dark') {
+      document.documentElement.removeAttribute('data-theme');
+    } else {
+      document.documentElement.setAttribute('data-theme', theme);
+    }
+    localStorage.setItem('theme', theme);
+  }
+
+  function loadTheme() {
+    const saved = localStorage.getItem('theme') || 'dark';
+    document.getElementById('themeSelect').value = saved;
+    setTheme(saved);
+  }
+
+  // Load theme on page load
+  loadTheme();
+
+  let isWaiting = false;
+
+  // Setup Speech Recognition
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  let recognition = null;
+  const micBtn = document.getElementById('micBtn');
+  
+  if (SpeechRecognition) {
+    recognition = new SpeechRecognition();
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = function() {
+      micBtn.style.background = 'rgba(0, 201, 167, 0.2)';
+      micBtn.textContent = '⏸️';
+      micBtn.title = 'Listening...';
+    };
+
+    recognition.onresult = function(event) {
+      const transcript = event.results[0][0].transcript;
+      document.getElementById('messageInput').value = transcript;
+      
+      // Auto-send voice commands for common queries
+      const lowerTranscript = transcript.toLowerCase();
+      
+      // Map common voice phrases to quick actions
+      if (lowerTranscript.includes('hello') || lowerTranscript.includes('hi') || lowerTranscript.includes('hey')) {
+        document.getElementById('messageInput').value = 'Hello';
+      } else if (lowerTranscript.includes('attendance') || lowerTranscript.includes('present')) {
+        if (lowerTranscript.includes('low') || lowerTranscript.includes('alert')) {
+          document.getElementById('messageInput').value = 'Low attendance alert';
+        } else {
+          document.getElementById('messageInput').value = 'Show attendance';
+        }
+      } else if (lowerTranscript.includes('mark') || lowerTranscript.includes('grade') || lowerTranscript.includes('score')) {
+        document.getElementById('messageInput').value = 'Show marks';
+      } else if (lowerTranscript.includes('cgpa') || lowerTranscript.includes('gpa') || lowerTranscript.includes('grade point')) {
+        document.getElementById('messageInput').value = 'Show CGPA';
+      } else if (lowerTranscript.includes('backlog') || lowerTranscript.includes('failed') || lowerTranscript.includes('fail')) {
+        document.getElementById('messageInput').value = 'Backlogs';
+      } else if (lowerTranscript.includes('fee') || lowerTranscript.includes('payment') || lowerTranscript.includes('paid')) {
+        document.getElementById('messageInput').value = 'Fee status';
+      } else if (lowerTranscript.includes('notification') || lowerTranscript.includes('alert') || lowerTranscript.includes('news')) {
+        document.getElementById('messageInput').value = 'Notifications';
+      } else if (lowerTranscript.includes('insight') || lowerTranscript.includes('performance') || lowerTranscript.includes('analysis')) {
+        document.getElementById('messageInput').value = 'Performance insights';
+      } else if (lowerTranscript.includes('faculty') || lowerTranscript.includes('teacher') || lowerTranscript.includes('professor') || lowerTranscript.includes('contact')) {
+        document.getElementById('messageInput').value = 'Faculty contacts';
+      } else if (lowerTranscript.includes('calendar') || lowerTranscript.includes('schedule') || lowerTranscript.includes('exam')) {
+        document.getElementById('messageInput').value = 'Academic calendar';
+      } else if (lowerTranscript.includes('scholarship') || lowerTranscript.includes('scholar') || lowerTranscript.includes('award')) {
+        document.getElementById('messageInput').value = 'Scholarship status';
+      } else if (lowerTranscript.includes('course') || lowerTranscript.includes('status') || lowerTranscript.includes('branch')) {
+        document.getElementById('messageInput').value = 'Course status';
+      } else if (lowerTranscript.includes('help') || lowerTranscript.includes('what can')) {
+        document.getElementById('messageInput').value = 'What can you help me with?';
+      } else if (lowerTranscript.includes('thank')) {
+        document.getElementById('messageInput').value = 'Thank you';
+      }
+      
+      sendMessage();
+    };
+
+    recognition.onspeechend = function() {
+      recognition.stop();
+    };
+
+    recognition.onend = function() {
+      micBtn.style.background = 'var(--card-bg)';
+      micBtn.textContent = '🎤';
+      micBtn.title = 'Click to speak';
+    };
+
+    recognition.onerror = function(event) {
+      console.error("Speech recognition error", event.error);
+      micBtn.style.background = 'var(--card-bg)';
+      micBtn.textContent = '🎤';
+      micBtn.title = 'Click to speak';
+      if (event.error === 'not-allowed') {
+        addMessage('⚠️ Microphone access denied. Please allow microphone access in your browser settings.', 'bot');
+      }
+    };
+
+    micBtn.addEventListener('click', () => {
+      if (micBtn.textContent.trim() === '🎤') {
+        recognition.start();
+      } else {
+        recognition.stop();
+      }
+    });
+  } else {
+    micBtn.style.display = 'none';
+  }
+
+  // Setup Speech Synthesis
+  function speakText(htmlText) {
+    if (!('speechSynthesis' in window)) return;
+    
+    // Stop any current speech
+    window.speechSynthesis.cancel();
+    
+    // Create a temporary element to strip HTML tags
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = htmlText;
+    
+    // Clean up emojis and get plain text
+    let plainText = tempDiv.textContent || tempDiv.innerText || "";
+    // Remove common emojis to prevent the voice spelling them out or acting weird
+    plainText = plainText.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '');
+    
+    const utterance = new SpeechSynthesisUtterance(plainText);
+    utterance.lang = 'en-US';
+    utterance.rate = 1.0; // Normal speed
+    utterance.pitch = 1.0;
+    
+    window.speechSynthesis.speak(utterance);
+  }
+
+  function getTime() {
+    return new Date().toLocaleTimeString([], {hour: '2-digit', minute: '2-digit'});
+  }
+
+  function addMessage(content, role) {
+    const chatBody = document.getElementById('chatBody');
+    const row = document.createElement('div');
+    row.className = `msg-row ${role}`;
+
+    const avatar = document.createElement('div');
+    avatar.className = `msg-avatar ${role}`;
+    avatar.textContent = role === 'bot' ? '🤖' : '👤';
+
+    const wrap = document.createElement('div');
+
+    const bubble = document.createElement('div');
+    bubble.className = 'msg-bubble';
+    bubble.innerHTML = content;
+
+    const time = document.createElement('div');
+    time.className = 'msg-time';
+    time.textContent = getTime();
+
+    wrap.appendChild(bubble);
+    wrap.appendChild(time);
+    row.appendChild(avatar);
+    row.appendChild(wrap);
+    chatBody.appendChild(row);
+    chatBody.scrollTop = chatBody.scrollHeight;
+    return row;
+  }
+
+  function showTyping(show) {
+    const t = document.getElementById('typingRow');
+    const chatBody = document.getElementById('chatBody');
+    if (show) {
+      t.classList.add('visible');
+      chatBody.appendChild(t);
+    } else {
+      t.classList.remove('visible');
+    }
+    chatBody.scrollTop = chatBody.scrollHeight;
+  }
+
+  async function sendMessage() {
+    if (isWaiting) return;
+    const input = document.getElementById('messageInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = '';
+    addMessage(text, 'user');
+    isWaiting = true;
+    showTyping(true);
+
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ message: text })
+      });
+      const data = await res.json();
+
+      setTimeout(() => {
+        showTyping(false);
+        if (data.logout || !data.success) {
+          if (data.redirect) { setTimeout(() => window.location.href = data.redirect, 1500); }
+          addMessage(data.message, 'bot');
+          speakText(data.message);
+        } else {
+          addMessage(data.message, 'bot');
+          speakText(data.message);
+        }
+        isWaiting = false;
+      }, 600 + Math.random() * 400);
+
+    } catch(err) {
+      showTyping(false);
+      addMessage('⚠️ Connection error. Please try again.', 'bot');
+      isWaiting = false;
+    }
+  }
+
+  function sendQuick(text) {
+    document.getElementById('messageInput').value = text;
+    sendMessage();
+  }
+
+  function doLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+      window.location.href = '/logout';
+    }
+  }
+
+  document.getElementById('messageInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+  });
+
+  // Semester tab toggle (Current / Previous semesters)
+  document.getElementById('chatBody').addEventListener('click', e => {
+    const btn = e.target.closest('.sem-toggle');
+    if (!btn) return;
+    const view = btn.getAttribute('data-view');
+    const wrap = btn.closest('.msg-row');
+    if (!wrap) return;
+    const bubble = wrap.querySelector('.msg-bubble');
+    if (!bubble) return;
+    const tabs = bubble.querySelectorAll('.sem-toggle');
+    const currentDiv = bubble.querySelector('.sem-current');
+    const previousDiv = bubble.querySelector('.sem-previous');
+    tabs.forEach(t => t.classList.toggle('active', t.getAttribute('data-view') === view));
+    if (currentDiv) currentDiv.style.display = view === 'current' ? '' : 'none';
+    if (previousDiv) previousDiv.style.display = view === 'previous' ? '' : 'none';
+  });
+
+  // Send welcome after short delay
+  setTimeout(() => {
+    addMessage(`👋 <b>Welcome!</b> I'm your EduParent Assistant.<br><br>I can help you with attendance, marks, CGPA, fees, backlogs, faculty contacts, and much more.<br><br>What would you like to check today? Use the quick reply buttons or just type!`, 'bot');
+  }, 500);
+</script>
+</body>
+</html>

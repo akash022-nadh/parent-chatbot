@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Register — EduParent</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0f1b35;
+    --navy-mid: #1a2d54;
+    --teal: #00c9a7;
+    --teal-dark: #00a889;
+    --gold: #f5c842;
+    --light: #e8f0fe;
+    --text: #e2e8f4;
+    --muted: #8a9bb8;
+    --card-bg: rgba(255,255,255,0.04);
+    --card-border: rgba(255,255,255,0.08);
+    --error: #ff6b6b;
+    --success: #00c9a7;
+    --bg-color: var(--navy);
+    --input-bg: rgba(255,255,255,0.05);
+  }
+
+  [data-theme="light"] {
+    --navy: #ffffff;
+    --navy-mid: #f5f5f5;
+    --teal: #000000;
+    --teal-dark: #333333;
+    --gold: #000000;
+    --light: #000000;
+    --text: #000000;
+    --muted: #666666;
+    --card-bg: rgba(0,0,0,0.03);
+    --card-border: rgba(0,0,0,0.15);
+    --error: #dc2626;
+    --success: #000000;
+    --bg-color: #ffffff;
+    --input-bg: rgba(0,0,0,0.03);
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg-color);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    overflow-x: hidden;
+    overflow-y: auto;
+    position: relative;
+    transition: background 0.3s, color 0.3s;
+    padding: 20px;
+    padding-top: 60px;
+    padding-bottom: 40px;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(245,200,66,0.15) 0%, transparent 70%);
+    top: -200px; right: -200px;
+    pointer-events: none;
+  }
+
+  .back-link {
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    color: var(--muted);
+    text-decoration: none;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.3s;
+    z-index: 100;
+  }
+
+  .back-link:hover { color: var(--teal); }
+
+  .theme-toggle {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 30px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    z-index: 100;
+    font-size: 0.85rem;
+    color: var(--text);
+    transition: all 0.3s;
+    max-width: 200px;
+  }
+
+  .theme-toggle select {
+    background: var(--card-bg);
+    border: none;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    outline: none;
+    padding: 4px 8px;
+    border-radius: 8px;
+    min-width: 120px;
+  }
+
+  .theme-toggle select option {
+    background: var(--navy-mid);
+    color: var(--text);
+  }
+
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: var(--navy-mid);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: var(--muted);
+    border-radius: 5px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--teal);
+  }
+
+  [data-theme="light"] ::-webkit-scrollbar-track {
+    background: #f0f0f0;
+  }
+
+  [data-theme="light"] ::-webkit-scrollbar-thumb {
+    background: #999;
+  }
+
+  .register-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 24px;
+    padding: 40px;
+    width: 100%;
+    max-width: 500px;
+    backdrop-filter: blur(10px);
+    position: relative;
+    z-index: 10;
+    margin: 20px 0;
+  }
+
+  .register-card h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  .register-card .subtitle {
+    color: var(--muted);
+    text-align: center;
+    margin-bottom: 30px;
+    font-size: 0.95rem;
+  }
+
+  .role-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 25px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .role-tab {
+    padding: 10px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 0.85rem;
+    transition: all 0.3s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .role-tab:hover { border-color: var(--teal); color: var(--text); }
+  .role-tab.active { background: var(--teal); color: var(--navy); border-color: var(--teal); font-weight: 500; }
+
+  .form-group {
+    margin-bottom: 18px;
+  }
+
+  .form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .form-group input, .form-group select {
+    width: 100%;
+    padding: 14px 16px;
+    border-radius: 12px;
+    border: 1px solid var(--card-border);
+    background: var(--input-bg);
+    color: var(--text);
+    font-size: 1rem;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .form-group input:focus, .form-group select:focus {
+    outline: none;
+    border-color: var(--teal);
+    box-shadow: 0 0 0 3px rgba(0,201,167,0.15);
+  }
+
+  .form-group input::placeholder { color: var(--muted); }
+
+  .form-group select option {
+    background: var(--navy-mid);
+    color: var(--text);
+  }
+
+  .form-row {
+    display: flex;
+    gap: 15px;
+  }
+
+  .form-row .form-group { flex: 1; }
+
+  .btn {
+    width: 100%;
+    padding: 16px;
+    border-radius: 12px;
+    border: none;
+    background: var(--teal);
+    color: var(--navy);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  .btn:hover { background: var(--teal-dark); transform: translateY(-2px); }
+  .btn:disabled { opacity: 0.6; cursor: not-allowed; transform: none; }
+
+  .btn-secondary {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    color: var(--text);
+    margin-top: 12px;
+  }
+
+  .btn-secondary:hover { border-color: var(--teal); background: var(--card-bg); }
+
+  .error-msg {
+    background: rgba(255,107,107,0.1);
+    border: 1px solid var(--error);
+    color: var(--error);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  .success-msg {
+    background: rgba(0,201,167,0.1);
+    border: 1px solid var(--success);
+    color: var(--success);
+    padding: 12px 16px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    font-size: 0.9rem;
+    display: none;
+  }
+
+  .login-link {
+    text-align: center;
+    margin-top: 20px;
+    color: var(--muted);
+    font-size: 0.9rem;
+  }
+
+  .login-link a {
+    color: var(--teal);
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  .login-link a:hover { text-decoration: underline; }
+
+  .role-specific-fields { display: none; }
+  .role-specific-fields.active { display: block; }
+
+  .password-hint {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  @media (max-width: 500px) {
+    .register-card { padding: 25px; }
+    .form-row { flex-direction: column; gap: 0; }
+    .role-tabs { gap: 6px; }
+    .role-tab { padding: 8px 12px; font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+
+<a href="/" class="back-link">← Back to Home</a>
+
+<div class="theme-toggle">
+  <span>🎨</span>
+  <select id="themeSelect" onchange="setTheme(this.value)">
+    <option value="dark">Dark Mode</option>
+    <option value="light">Light Mode</option>
+  </select>
+</div>
+
+<div class="register-card">
+  <h1>Create Account</h1>
+  <p class="subtitle">Register for EduParent Portal</p>
+
+  <div class="role-tabs">
+    <button class="role-tab active" data-role="student" onclick="selectRole('student')">👨‍🎓 Student</button>
+    <button class="role-tab" data-role="parent" onclick="selectRole('parent')">👨‍👩 Parent</button>
+    <button class="role-tab" data-role="faculty" onclick="selectRole('faculty')">👨‍🏫 Faculty</button>
+  </div>
+
+  <div class="error-msg" id="errorMsg"></div>
+  <div class="success-msg" id="successMsg"></div>
+
+  <form id="registerForm" onsubmit="handleRegister(event)">
+    <input type="hidden" id="selectedRole" value="student">
+
+    <!-- Common Fields -->
+    <div class="form-row">
+      <div class="form-group">
+        <label for="firstName">First Name</label>
+        <input type="text" id="firstName" placeholder="Enter first name" required>
+      </div>
+      <div class="form-group">
+        <label for="lastName">Last Name</label>
+        <input type="text" id="lastName" placeholder="Enter last name" required>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="email">Email</label>
+      <input type="email" id="email" placeholder="Enter email address" required>
+    </div>
+
+    <div class="form-group">
+      <label for="phone">Phone Number</label>
+      <input type="tel" id="phone" placeholder="Enter 10-digit phone number" pattern="[0-9]{10}" required>
+    </div>
+
+    <div class="form-group">
+      <label for="username">Username</label>
+      <input type="text" id="username" placeholder="Choose a username" required>
+    </div>
+
+    <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" id="password" placeholder="Create password (min 8 characters)" minlength="8" required>
+      <div class="password-hint">Must be at least 8 characters long</div>
+    </div>
+
+    <div class="form-group">
+      <label for="confirmPassword">Confirm Password</label>
+      <input type="password" id="confirmPassword" placeholder="Confirm your password" required>
+    </div>
+
+    <!-- Student Specific Fields -->
+    <div class="role-specific-fields" id="studentFields">
+      <div class="form-group">
+        <label for="regNo">Registration Number</label>
+        <input type="text" id="regNo" placeholder="e.g., STU001">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="branch">Branch</label>
+          <select id="branch">
+            <option value="">Select Branch</option>
+            <option value="CSE">Computer Science (CSE)</option>
+            <option value="ECE">Electronics (ECE)</option>
+            <option value="MECH">Mechanical (MECH)</option>
+            <option value="IT">Information Technology (IT)</option>
+            <option value="EEE">Electrical (EEE)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="year">Year</label>
+          <select id="year">
+            <option value="">Select Year</option>
+            <option value="1">1st Year</option>
+            <option value="2">2nd Year</option>
+            <option value="3">3rd Year</option>
+            <option value="4">4th Year</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Parent Specific Fields -->
+    <div class="role-specific-fields" id="parentFields">
+      <div class="form-group">
+        <label for="studentRegNo">Student Registration Number</label>
+        <input type="text" id="studentRegNo" placeholder="Enter your child's reg no (e.g., STU001)">
+      </div>
+      <div class="form-group">
+        <label for="relationship">Relationship</label>
+        <select id="relationship">
+          <option value="">Select Relationship</option>
+          <option value="Father">Father</option>
+          <option value="Mother">Mother</option>
+          <option value="Guardian">Guardian</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Faculty Specific Fields -->
+    <div class="role-specific-fields" id="facultyFields">
+      <div class="form-group">
+        <label for="employeeId">Employee ID</label>
+        <input type="text" id="employeeId" placeholder="e.g., FAC001">
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label for="department">Department</label>
+          <select id="department">
+            <option value="">Select Department</option>
+            <option value="CSE">Computer Science (CSE)</option>
+            <option value="ECE">Electronics (ECE)</option>
+            <option value="MECH">Mechanical (MECH)</option>
+            <option value="IT">Information Technology (IT)</option>
+            <option value="EEE">Electrical (EEE)</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="designation">Designation</label>
+          <select id="designation">
+            <option value="">Select Designation</option>
+            <option value="Professor">Professor</option>
+            <option value="Associate Professor">Associate Professor</option>
+            <option value="Assistant Professor">Assistant Professor</option>
+            <option value="Lecturer">Lecturer</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="btn" id="submitBtn">Create Account</button>
+    <button type="button" class="btn btn-secondary" onclick="window.location.href='/'">Cancel</button>
+  </form>
+
+  <div class="login-link">
+    Already have an account? <a href="#" id="loginLink">Login here</a>
+  </div>
+</div>
+
+<script>
+  // Theme handling
+  function setTheme(theme) {
+    document.body.setAttribute('data-theme', theme);
+    localStorage.setItem('theme', theme);
+  }
+
+  const savedTheme = localStorage.getItem('theme') || 'dark';
+  setTheme(savedTheme);
+  document.getElementById('themeSelect').value = savedTheme;
+
+  // Role selection
+  function selectRole(role) {
+    document.querySelectorAll('.role-tab').forEach(tab => tab.classList.remove('active'));
+    document.querySelector(`.role-tab[data-role="${role}"]`).classList.add('active');
+    document.getElementById('selectedRole').value = role;
+
+    // Show/hide role-specific fields
+    document.querySelectorAll('.role-specific-fields').forEach(fields => fields.classList.remove('active'));
+    document.getElementById(role + 'Fields').classList.add('active');
+
+    // Update login link
+    const loginUrls = {
+      student: '/student/login',
+      parent: '/',
+      faculty: '/faculty/login',
+      admin: '/admin/login'
+    };
+    document.getElementById('loginLink').href = loginUrls[role];
+  }
+
+  // Initialize with student role
+  selectRole('student');
+
+  // Registration handler
+  async function handleRegister(event) {
+    event.preventDefault();
+
+    const errorMsg = document.getElementById('errorMsg');
+    const successMsg = document.getElementById('successMsg');
+    const submitBtn = document.getElementById('submitBtn');
+
+    errorMsg.style.display = 'none';
+    successMsg.style.display = 'none';
+
+    // Get form data
+    const role = document.getElementById('selectedRole').value;
+    const firstName = document.getElementById('firstName').value.trim();
+    const lastName = document.getElementById('lastName').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+
+    // Validate passwords match
+    if (password !== confirmPassword) {
+      errorMsg.textContent = 'Passwords do not match';
+      errorMsg.style.display = 'block';
+      return;
+    }
+
+    // Build registration data
+    const data = {
+      username: username,
+      email: email,
+      password: password,
+      role: role,
+      profile: {
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone
+      }
+    };
+
+    // Add role-specific data
+    if (role === 'student') {
+      data.role_specific = {
+        student_reg_no: document.getElementById('regNo').value.trim().toUpperCase() || null,
+        branch: document.getElementById('branch').value || null,
+        year: parseInt(document.getElementById('year').value) || null
+      };
+    } else if (role === 'parent') {
+      data.role_specific = {
+        student_reg_no: document.getElementById('studentRegNo').value.trim().toUpperCase(),
+        relationship: document.getElementById('relationship').value
+      };
+    } else if (role === 'faculty') {
+      data.role_specific = {
+        employee_id: document.getElementById('employeeId').value.trim(),
+        department: document.getElementById('department').value,
+        designation: document.getElementById('designation').value
+      };
+    } else if (role === 'admin') {
+      data.admin_code = document.getElementById('adminCode').value.trim();
+    }
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Creating Account...';
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data)
+      });
+
+      if (!response.ok) {
+        let errorMsg = 'Registration failed';
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.message || errorMsg;
+        } catch (e) {
+          errorMsg = `Server error (${response.status}). Please try again.`;
+        }
+        throw new Error(errorMsg);
+      }
+
+      const result = await response.json();
+
+      if (result.success) {
+        successMsg.textContent = result.message || 'Account created successfully! Redirecting to login...';
+        successMsg.style.display = 'block';
+
+        // Redirect to appropriate login page
+        setTimeout(() => {
+          const loginUrls = {
+            student: '/student/login',
+            parent: '/',
+            faculty: '/faculty/login',
+            admin: '/admin/login'
+          };
+          window.location.href = loginUrls[role];
+        }, 2000);
+      } else {
+        errorMsg.textContent = result.message || 'Registration failed. Please try again.';
+        errorMsg.style.display = 'block';
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+        errorMsg.textContent = 'Connection error. Make sure you are accessing via http://localhost:5000 (not a proxy URL).';
+      } else {
+        errorMsg.textContent = error.message;
+      }
+      errorMsg.style.display = 'block';
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Create Account';
+    }
+  }
+</script>
+
+</body>
+</html>

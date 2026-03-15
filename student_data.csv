@@ -1,0 +1,11 @@
+Reg_No,Student,Parent_Phone,Status,Total_Backlogs,Year,Semester,Subject,Attendance_%,Marks,Grade_Point,Backlog,Backlog_Type,Scholarship_Status,Scholarship_Amount,Semester_CGPA,Year_Overall_CGPA
+231FA04001,Arjun Mehta,9876543211,Active,0,1,1,Programming in C,67,89,8.9,No,,No,0,7.48,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,1,Engineering Mathematics,95,36,3.6,Yes,Incomplete,No,0,7.48,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,1,Engineering Physics,94,97,9.7,No,,No,0,7.48,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,1,Basic Electronics,82,55,5.5,No,,No,0,7.48,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,1,Communication Skills,67,97,9.7,No,,No,0,7.48,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,2,Data Structures,85,44,4.4,Yes,Incomplete,No,0,6.4,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,2,Discrete Mathematics,88,40,4,Yes,Repeat Grade,No,0,6.4,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,2,Digital Logic,73,80,8,No,,No,0,6.4,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,2,Environmental Science,89,88,8.8,No,,No,0,6.4,6.94
+231FA04001,Arjun Mehta,9876543211,Active,0,1,2,Python Programming,83,68,6.8,No,,No,0,6.4,6.94
